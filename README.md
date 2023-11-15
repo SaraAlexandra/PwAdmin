@@ -1,0 +1,15 @@
+# PwAdmin
+=Password rules=
+-Must have upper letter 
+-Must have lower letter
+-Must have numbers
+-Must have special chars
+
+
+Has the following features:
+
+==Generate password mode: ( "-g" ) ==
+-> generates a random password asking the user the desired length(minimum length 10 )
+-> asks the user if the newly generated password should be stored in the password database
+-> if Y, the script will ask for a description for the current password in order to find it later
+-> if N, the script ends, the generated password is in the terminal.
