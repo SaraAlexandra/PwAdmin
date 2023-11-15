@@ -8,7 +8,7 @@ def generateDBTable(conn):
     query = """SELECT count(name) FROM sqlite_master WHERE type='table' AND name='PASSWORDS';"""
     cursor.execute(query)
     if cursor.fetchone()[0] == 1:
-        pass # table exists
+        pass
     else:
         table = """CREATE TABLE PASSWORDS (
             ID INTEGER PRIMARY KEY,
