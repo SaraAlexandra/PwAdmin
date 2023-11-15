@@ -3,7 +3,9 @@ from random import randint
 from enum import IntEnum
 import sqlite3
 import database
-import tkinter
+from tkinter import *
+from tkinter.ttk import *
+from utils import Table
 
 
 # uppercase letters
@@ -54,10 +56,6 @@ def generatePassword(passwordLength):
 
     return (True, password)
 
-
-
-
-
 # main function for password generation workflow
 def mainGenerate(dbConnection):
     print("+--------------------+\n| Password Generator |\n+--------------------+")
@@ -94,40 +92,45 @@ def mainGenerate(dbConnection):
 
 # main method for displaying passwords
 def mainView(dbConnection):
-    print("Password viewer start")
-    print("All entries in database:")
-    database.readAll(dbConnection)
-    print("View complete. Bye!")
+    print("-> Password viewer start")
+    allPasswords = database.readAll(dbConnection)
+    print(allPasswords)
+
+    root = Tk()
+    root.title("Password Admin - View all")
+    root.geometry('700x350')
+    table = Table(root, allPasswords,[5, 32, 20, 5])
+    root.mainloop()
+
+    print("-> View complete. Bye!")
 
 
 # returns pass at certain description (uses wildcards)
 def mainGetPasswordForDesc(dbConnection, desc):
-    print("Get specific password viewer start")
-    print("Required password:")
-    database.readPassword(dbConnection, desc)
-    print("View complete. Bye!")
+    print("-> Get password for description:", desc)
+    print("-> Required password:", database.readPassword(dbConnection, desc)[0][1])
+    print("-> View complete. Bye!")
 
 
 # update password at desc
-def mainUpdatePasswordForDesc(dbConnection,desc, newLength):
-    print("Update password viewer start, newLength must match old length!")
+def mainUpdatePasswordForDesc(dbConnection, desc):
+    print("-> Update password viewer")
     # read before update
-    database.readPassword(dbConnection, desc)
-    status, generatedPassword = generatePassword(int(newLength))
+    oldPw = database.readPassword(dbConnection, desc)
+    previousLength = oldPw[0][3]
+    print("Password before update:", oldPw[0][1])
+    status, generatedPassword = generatePassword(int(previousLength))
     if(status == False):
         sys.exit("Error occured, please re-run the script!")
 
-    database.updatePassword(dbConnection, desc, generatedPassword, newLength)
-    print("Updated password:")
+    newPw = database.updatePassword(dbConnection, desc, generatedPassword, previousLength)
     # read after update
-    database.readPassword(dbConnection, desc)
-
-    print("Update complete. Bye!")
-
+    print("->  Updated password:", newPw)
+    print("->  Update complete. Bye!")
+    
 
 if __name__ == "__main__":
     execMode = sys.argv[1]
-    
     dbConnection = sqlite3.connect("pwadmin.db")
 
     if execMode == '-g' or execMode == '-generate':
@@ -137,11 +140,10 @@ if __name__ == "__main__":
     elif execMode == '-d' or execMode == '-description':
         mainGetPasswordForDesc(dbConnection, sys.argv[2])
     elif execMode == '-u' or execMode == '-update':
-        mainUpdatePasswordForDesc(dbConnection, sys.argv[2], sys.argv[3])
+        mainUpdatePasswordForDesc(dbConnection, sys.argv[2])
     else:
-        sys.exit("Supported modes [-g, -v, -d [desc], -u [desc] [newLength]")
+        sys.exit("Supported modes [-g, -v, -d [descrption], -u [descrption]")
     
-
     dbConnection.close()
 
 

@@ -26,25 +26,30 @@ def insertPasswordInDB(conn, pw, desc, pwLen):
     conn.commit()
 
 # read all passwords/desc
-
 def readAll(conn):
     cursor = conn.cursor()
     cursor.execute(FIND_TABLE_QUERY)
     if cursor.fetchone()[0] == 1:
-        for row in cursor.execute("SELECT * FROM PASSWORDS;"):
-            print(row)
+        query = "SELECT * FROM PASSWORDS;"
+        result = cursor.execute(query)
+        return result.fetchall()
     else:
         print("No data available in database - readAll")
+        return []
 
+# read pw for description
 def readPassword(conn, desc):
     cursor = conn.cursor()
     cursor.execute(FIND_TABLE_QUERY)
     if cursor.fetchone()[0] == 1:
-        for row in cursor.execute("SELECT * FROM PASSWORDS WHERE DESCRIPTION like ?;", ('%' + desc + '%',)):
-            print(row)
+        query = "SELECT * FROM PASSWORDS WHERE DESCRIPTION like ?;"
+        result = cursor.execute(query, ('%' + desc + '%',))
+        return result.fetchall()
     else:
         print("No data available in database - readPassword")
+        return []
 
+# update password at desc
 def updatePassword(conn, desc, newPw, newLength):
     cursor = conn.cursor()
     cursor.execute(FIND_TABLE_QUERY)
@@ -55,4 +60,4 @@ def updatePassword(conn, desc, newPw, newLength):
     else:
         print("No data available in database - udaptePassword")
 
-        
+    return newPw;  
