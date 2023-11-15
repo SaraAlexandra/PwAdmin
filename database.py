@@ -5,20 +5,18 @@ FIND_TABLE_QUERY = """ SELECT count(name) FROM sqlite_master WHERE type='table' 
 # creates table in database
 def generateDBTable(conn):
     cursor = conn.cursor()
-    query = """SELECT count(name) FROM sqlite_master WHERE type='table' AND name='PASSWORDS';"""
-    cursor.execute(query)
+    cursor.execute(FIND_TABLE_QUERY)
     if cursor.fetchone()[0] == 1:
         pass
     else:
         table = """CREATE TABLE PASSWORDS (
             ID INTEGER PRIMARY KEY,
             PASSWORD               VARCHAR(50) NOT NULL,
-            DESCRIPTION            VARCHAR(10) NOT NULL,
+            DESCRIPTION            VARCHAR(20) NOT NULL,
             LENGTH                 INT NOT NULL
             ); """
         
         cursor.execute(table)
-        print("Created PASSWORDS table")
 
 # insert entry
 def insertPasswordInDB(conn, pw, desc, pwLen):

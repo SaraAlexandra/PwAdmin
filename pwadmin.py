@@ -59,14 +59,16 @@ def generatePassword(passwordLength):
 
 
 # main function for password generation workflow
-def mainGenerate():
+def mainGenerate(dbConnection):
     print("+--------------------+\n| Password Generator |\n+--------------------+")
-    dbConnection = sqlite3.connect("pwadmin.db")
     database.generateDBTable(dbConnection)
-    pwLength = int(input("-> Password length(min. 10 characters): "))
+
+    pwLength = int(input("-> Password length(10-50 characters): "))
     
-    if(pwLength < 10):
+    if pwLength < 10:
         sys.exit("-> Desired password length is too short!")
+    if pwLength > 50:
+        sys.exit("-> Desired password length is too long!")
     
     status, generatedPassword = generatePassword(pwLength)
     
@@ -77,38 +79,38 @@ def mainGenerate():
         sys.exit("Error occured, please re-run the script!")
 
     savePassword = input("-> Save password in database (y/n): ")
+    
     if(savePassword == 'Y' or savePassword == 'y'):
         description = input("-> Enter password description(max. 20 characters): ")
+        if len(description) > 20:
+            sys.exit("-> Description is too long!")
+        elif len(description) == 0:
+            sys.exit("-> Empty description not allowed!")
+        
         database.insertPasswordInDB(dbConnection, generatedPassword, description, pwLength)
     
-    dbConnection.close()
     print("-> Generation complete. Bye!")
 
 
 # main method for displaying passwords
-def mainView():
+def mainView(dbConnection):
     print("Password viewer start")
-    dbConnection = sqlite3.connect("pwadmin.db")
     print("All entries in database:")
     database.readAll(dbConnection)
-    dbConnection.close()
     print("View complete. Bye!")
 
 
 # returns pass at certain description (uses wildcards)
-def mainGetPasswordForDesc(desc):
+def mainGetPasswordForDesc(dbConnection, desc):
     print("Get specific password viewer start")
-    dbConnection = sqlite3.connect("pwadmin.db")
     print("Required password:")
     database.readPassword(dbConnection, desc)
-    dbConnection.close()
     print("View complete. Bye!")
 
 
 # update password at desc
-def mainUpdatePasswordForDesc(desc, newLength):
+def mainUpdatePasswordForDesc(dbConnection,desc, newLength):
     print("Update password viewer start, newLength must match old length!")
-    dbConnection = sqlite3.connect("pwadmin.db")
     # read before update
     database.readPassword(dbConnection, desc)
     status, generatedPassword = generatePassword(int(newLength))
@@ -119,19 +121,27 @@ def mainUpdatePasswordForDesc(desc, newLength):
     print("Updated password:")
     # read after update
     database.readPassword(dbConnection, desc)
-    dbConnection.close()
+
     print("Update complete. Bye!")
 
 
 if __name__ == "__main__":
     execMode = sys.argv[1]
-    if(execMode == '-g'):
-        mainGenerate()
-    elif(execMode == '-v'):
-        mainView()
-    elif(execMode == '-d'):
-        mainGetPasswordForDesc(sys.argv[2])
-    elif(execMode == '-u'):
-        mainUpdatePasswordForDesc(sys.argv[2], sys.argv[3])
+    
+    dbConnection = sqlite3.connect("pwadmin.db")
+
+    if execMode == '-g' or execMode == '-generate':
+        mainGenerate(dbConnection)
+    elif execMode == '-v' or execMode == '-view':
+        mainView(dbConnection)
+    elif execMode == '-d' or execMode == '-description':
+        mainGetPasswordForDesc(dbConnection, sys.argv[2])
+    elif execMode == '-u' or execMode == '-update':
+        mainUpdatePasswordForDesc(dbConnection, sys.argv[2], sys.argv[3])
     else:
         sys.exit("Supported modes [-g, -v, -d [desc], -u [desc] [newLength]")
+    
+
+    dbConnection.close()
+
+
