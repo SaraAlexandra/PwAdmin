@@ -1,8 +1,12 @@
 # PwAdmin
 =Password rules=
+
 -Must have upper letter 
+
 -Must have lower letter
+
 -Must have numbers
+
 -Must have special chars
 
 
